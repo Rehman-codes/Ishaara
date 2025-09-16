@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 def get_data_generators(
-    data_dir="data/Dataset/",
+    data_dir="data/",
     img_size=(64, 64),
     batch_size=32,
     val_split=0.2

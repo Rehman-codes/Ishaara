@@ -5,7 +5,7 @@ from src.evaluate import plot_training_curves, evaluate_model
 
 def main():
     model, history, (train_gen, val_gen) = train_model(
-        data_path="data/Dataset/",
+        data_path="data/",
         batch_size=32,
         learning_rate=0.001,
         epochs=30,
