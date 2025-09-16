@@ -1,55 +1,50 @@
 # src/dataset.py
 
-import numpy as np
-from sklearn.model_selection import train_test_split
+import tensorflow as tf
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-def load_data(data_path="data/"):
+def get_data_generators(
+    data_dir="data/Dataset/",
+    img_size=(64, 64),
+    batch_size=32,
+    val_split=0.2
+):
     """
-    Load dataset from .npy files.
-    
+    Load dataset from folder structure using ImageDataGenerator.
+    - Assumes data_dir has subfolders '0', '1', ..., '9'.
+
     Args:
-        data_path (str): Path to folder containing X.npy and Y.npy.
-    
+        data_dir (str): Path to dataset root.
+        img_size (tuple): Target image size.
+        batch_size (int): Batch size for training.
+        val_split (float): Fraction for validation split.
+
     Returns:
-        X (np.ndarray): Images, normalized (0–1), shape (N, 64, 64, 1).
-        y (np.ndarray): Labels as integers, shape (N,).
+        train_gen, val_gen: Data generators.
     """
-    X = np.load(data_path + "X.npy")   # shape: (2062, 64, 64)
-    y = np.load(data_path + "Y.npy")   # shape: (2062, 10), one-hot
-
-    # Normalize images (0–255 → 0–1)
-    X = X.astype("float32") / 255.0
-
-    # Add channel dimension (grayscale → 1 channel)
-    X = np.expand_dims(X, axis=-1)     # shape: (N, 64, 64, 1)
-
-    # Convert one-hot labels to integers
-    y = np.argmax(y, axis=1)           # shape: (N,)
-
-    return X, y
-
-
-def split_data(X, y, test_size=0.2, val_size=0.1, random_state=42):
-    """
-    Split dataset into train/validation/test sets.
-    
-    Args:
-        X (np.ndarray): Input images.
-        y (np.ndarray): Labels.
-        test_size (float): Proportion for test split.
-        val_size (float): Proportion for validation split.
-    
-    Returns:
-        X_train, X_val, X_test, y_train, y_val, y_test
-    """
-    # First split into train+val and test
-    X_temp, X_test, y_temp, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=random_state, stratify=y
-    )
-    # Split train+val into train and val
-    val_ratio = val_size / (1 - test_size)  # adjust ratio for remaining data
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_temp, y_temp, test_size=val_ratio, random_state=random_state, stratify=y_temp
+    datagen = ImageDataGenerator(
+        rescale=1.0/255.0,
+        validation_split=val_split
     )
 
-    return X_train, X_val, X_test, y_train, y_val, y_test
+    train_gen = datagen.flow_from_directory(
+        data_dir,
+        target_size=img_size,
+        color_mode="rgb",
+        batch_size=batch_size,
+        class_mode="sparse",
+        subset="training",
+        shuffle=True
+    )
+
+    val_gen = datagen.flow_from_directory(
+        data_dir,
+        target_size=img_size,
+        color_mode="rgb",
+        batch_size=batch_size,
+        class_mode="sparse",
+        subset="validation",
+        shuffle=False
+    )
+
+    return train_gen, val_gen
