@@ -13,7 +13,7 @@ def train_model(
     dropout_rate=0.5,
     l2_lambda=0.001,
     patience=5,
-    model_save_path="experiments/run1/model.h5"
+    model_save_path="experiments/run1/model.keras"
 ):
     # Data
     train_gen, val_gen = get_data_generators(data_path, batch_size=batch_size)
